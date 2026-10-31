@@ -41,7 +41,7 @@ public class OperationModel {
                     .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("Unknown Key: " + symbol));
         }
-    }   // <- the enum ends HERE
+    }
 
     private String expression = ""; // pang handle ng expression display (like pinapakita ano combo mo right niau)
     private String key; // symbol kung anong button pinindot
