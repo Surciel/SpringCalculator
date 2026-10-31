@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Calculator</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .calcbox { display: inline-block; width: 100%; max-width: 340px; border: 2px solid #8a4fff; background: #cfe0b8; padding: 16px; }
+        .calc { background: #000; color: #fff; border-radius: 16px; padding: 12px; }
+        .display { min-height: 110px; display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-end; padding: 8px; text-align: right; word-break: break-all; }
+        .expression { font-size: 32px; line-height: 1.2; min-height: 38px; }
+        .error { font-size: 16px; color: #e8735a; min-height: 22px; }
+        .toolbar { display: flex; justify-content: flex-end; border-bottom: 1px solid #222; }
+        .toolbar button { background: none; border: 0; color: #8fd45a; font-size: 24px; cursor: pointer; padding: 4px 10px; }
+        .keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding-top: 12px; }
+        .keys button { aspect-ratio: 1; border-radius: 50%; border: 1px solid #2a2a2a; background: #1c1c1c; color: #fff; font-size: 22px; cursor: pointer; touch-action: manipulation; }
+        .keys button:active, .toolbar button:active { opacity: 0.6; }
+        .keys button:focus-visible, .toolbar button:focus-visible { outline: 2px solid #5ec8c0; outline-offset: 2px; }
+        .keys .op { color: #8fd45a; }
+        .keys .clear { color: #e8735a; }
+        .keys .equals { background: #3f7d0e; border-color: #3f7d0e; }
+    </style>
+</head>
+<body>
+    <p class="note">ito na yung main calculator natin;<br>both free and paid ma-reredirect dito</p>
+    <p class="note"><b id="plan-label"></b></p>
+
+    <div class="panel">
+        <h1>ang calc (short for calcualtor)</h1>
+
+        <div class="calcbox">
+            <div class="calc">
+                <div class="display">
+                    <div class="expression" id="expression"></div>
+                    <div class="error" id="error"></div>
+                </div>
+                <div class="toolbar">
+                    <button type="button" data-key="back" aria-label="Backspace">&#9003;</button>
+                </div>
+                <div class="keys">
+                    <button type="button" data-key="C" class="clear" aria-label="Clear">C</button>
+                    <button type="button" data-key="()" class="op" aria-label="Parentheses">( )</button>
+                    <button type="button" data-key="%" class="op" aria-label="Percent">%</button>
+                    <button type="button" data-key="÷" class="op" aria-label="Divide">÷</button>
+
+                    <button type="button" data-key="7">7</button>
+                    <button type="button" data-key="8">8</button>
+                    <button type="button" data-key="9">9</button>
+                    <button type="button" data-key="×" class="op" aria-label="Multiply">×</button>
+
+                    <button type="button" data-key="4">4</button>
+                    <button type="button" data-key="5">5</button>
+                    <button type="button" data-key="6">6</button>
+                    <button type="button" data-key="-" class="op" aria-label="Subtract">&minus;</button>
+
+                    <button type="button" data-key="1">1</button>
+                    <button type="button" data-key="2">2</button>
+                    <button type="button" data-key="3">3</button>
+                    <button type="button" data-key="+" class="op" aria-label="Add">+</button>
+
+                    <button type="button" data-key="+/-" aria-label="Plus or minus">+/&minus;</button>
+                    <button type="button" data-key="0">0</button>
+                    <button type="button" data-key=".">.</button>
+                    <button type="button" data-key="=" class="equals" aria-label="Equals">=</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const expressionEl = document.getElementById('expression');
+        const errorEl = document.getElementById('error');
+        let expression = '';
+
+        // same logic as before: send the display text + clicked key to /press
+        async function press(key) {
+            try {
+                const params = new URLSearchParams({ expression: expression, key: key });
+                const response = await fetch('/press?' + params);
+                const data = await response.json();
+                expression = data.expression || '';
+                expressionEl.textContent = expression;
+                errorEl.textContent = data.error || '';
+            } catch (e) {
+                errorEl.textContent = "Can't reach the server";
+            }
+        }
+
+        // ---------- which version? (set by the link: calculator.html?plan=super) ----------
+        const isPaid = new URLSearchParams(location.search).get('plan') === 'super';
+        document.getElementById('plan-label').textContent =
+            isPaid ? 'SUPER DUPER MAANGAS VERSION (may tunog!)' : 'DI MAANGAS VERSION (walang tunog)';
+
+        // ---------- paid-only sounds (made in the browser, no audio files needed) ----------
+        let audioCtx;
+
+        // plays one short videoke-style beep
+        function beep(freq, start = 0, duration = 0.12) {
+            audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            const t = audioCtx.currentTime + start;
+            osc.type = 'square';
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.12, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(t);
+            osc.stop(t + duration);
+        }
+
+        // each number climbs up the scale, like the keypad on a videoke remote
+        const KEY_TONES = { '0': 523, '1': 587, '2': 659, '3': 698, '4': 784,
+                            '5': 880, '6': 988, '7': 1047, '8': 1175, '9': 1319 };
+
+        // little celebration tune on "="
+        function jingle() {
+            [523, 659, 784, 1047, 784, 1047].forEach((note, i) => beep(note, i * 0.14, 0.18));
+        }
+
+        // plays static/audio/equals.mp3 if you add one, otherwise falls back to the jingle
+        function playEquals() {
+            new Audio('audio/equals.mp3').play().catch(jingle);
+        }
+
+        function playSound(key) {
+            try {
+                if (key === '=') playEquals();
+                else beep(KEY_TONES[key] || 330);   // operators, C, back, etc. share a lower beep
+            } catch (e) { /* no sound is fine, the calculator still works */ }
+        }
+
+        document.querySelectorAll('button[data-key]').forEach(button => {
+            button.addEventListener('click', () => {
+                if (isPaid) playSound(button.dataset.key);
+                press(button.dataset.key);
+            });
+        });
+    </script>
+</body>
+</html>
