@@ -138,15 +138,15 @@ public class CalculatorService {
             int open = text.lastIndexOf('(');
             int close = text.indexOf(')', open);
             if (close == -1) {
-                throw new IllegalArgumentException("Invalid format");
+                throw new IllegalArgumentException("??? so ano maglalagay ka lang ( tapos ayon na? wala man lang expression buseng");
             }
 
             // someting something bracket near operator
             if (open > 0 && "(+-×÷".indexOf(text.charAt(open - 1)) < 0) {
-                throw new IllegalArgumentException("Invalid format");
+                throw new IllegalArgumentException("OY BAWAL YAN");
             }
             if (close + 1 < text.length() && ")+-×÷%".indexOf(text.charAt(close + 1)) < 0) {
-                throw new IllegalArgumentException("Invalid format");
+                throw new IllegalArgumentException("BAWAL NGA, IBA TRY MO KULIT");
             }
 
             String inside = text.substring(open + 1, close);
@@ -179,14 +179,14 @@ public class CalculatorService {
                 pos++;
             }
             if (start == pos) {
-                throw new IllegalArgumentException("Invalid format");
+                throw new IllegalArgumentException("ayan mali, ayos bos");
             }
 
             double number;
             try {
                 number = Double.parseDouble(text.substring(start, pos));
             } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("Invalid format");
+                throw new IllegalArgumentException("???? ayan mali tuloy");
             }
 
             // each % divides by 100
@@ -208,7 +208,7 @@ public class CalculatorService {
             // the operator after the number
             char op = text.charAt(pos);
             if (op != '+' && op != '-' && op != '×' && op != '÷') {
-                throw new IllegalArgumentException("Invalid format");
+                throw new IllegalArgumentException("ano ba ha, napapagod nako jo!");
             }
             operators.add(op);
             pos++;
@@ -230,12 +230,12 @@ public class CalculatorService {
                         break;
                     case '÷':
                         if (right == 0) {
-                            throw new IllegalArgumentException("Can't divide by 0");
+                            throw new IllegalArgumentException("neng, kailan ka nakakaita na pwede mag divide by 0??");
                         }
                         result = left / right;
                         break;
                     default:
-                        throw new IllegalArgumentException("Invalid format");
+                        throw new IllegalArgumentException("smh tinatamad nako magsulat ng kada sariling argument, ulitin mo nalang");
                 }
 
                 // replace two numbers with result and remove operator
@@ -261,7 +261,7 @@ public class CalculatorService {
                     answer = answer - next;
                     break;
                 default:
-                    throw new IllegalArgumentException("Invalid format");
+                    throw new IllegalArgumentException("LT nagkamali kapa dito");
             }
         }
         return answer;
