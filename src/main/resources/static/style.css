@@ -59,6 +59,8 @@ body {
 .qr { min-height: 240px; display: flex; flex-direction: column; align-items: center; gap: 8px; font-weight: 700; }
 .qr img { display: block; width: 100%; max-width: 260px; margin: 12px auto 0; }
 
-.back-link { display: inline-block; margin: 0 0 16px; padding: 8px 14px; border: 1px solid #1a1a1a;
-    color: #1a1a1a; background: transparent; text-decoration: none; font-size: 14px; }
-.back-link:hover { background: #1a1a1a; color: #fff; }
+/* back button: same lime look as .btn, a bit smaller */
+.back-link { display: inline-block; padding: 6px 14px; background: #b8ff5a; border: 2px solid #222;
+    color: #111; font-size: 14px; font-weight: 700; text-decoration: none; }
+.back-link:hover { background: #a3ee3f; }
+.back-link:focus-visible { outline: 3px solid #8a4fff; outline-offset: 2px; }
